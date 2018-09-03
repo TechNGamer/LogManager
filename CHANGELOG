@@ -3,3 +3,7 @@ v1.0.0 (Master):
 - LogTalker added.
 - LogManager added.
 - Creates folder in the dll's directory.
+
+v1.0.1 (Master):
+- Exposes log file locations.
+- Exposes log folder location.
