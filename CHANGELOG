@@ -1,0 +1,5 @@
+v1.0.0 (Master):
+- Main functionallity is present.
+- LogTalker added.
+- LogManager added.
+- Creates folder in the dll's directory.
