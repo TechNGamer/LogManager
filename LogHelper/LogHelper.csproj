@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Utilities.Log</RootNamespace>
+    <PackageId>Logging Helper</PackageId>
+    <Authors>KuroNeko (Tech N Gamer)</Authors>
+    <Company />
+    <Description>This library contains a logger that puts the stress off the main thread and onto a seperate thread. Which means there is no async behaviours. It is also very minimal.</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+</Project>
