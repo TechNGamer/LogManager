@@ -7,6 +7,10 @@
     <Authors>KuroNeko (Tech N Gamer)</Authors>
     <Company />
     <Description>This library contains a logger that puts the stress off the main thread and onto a seperate thread. Which means there is no async behaviours. It is also very minimal.</Description>
+    <Version>1.0.1</Version>
+    <PackageProjectUrl>https://gitlab.com/KuroNekoTNG/LogManager</PackageProjectUrl>
+    <RepositoryUrl>https://gitlab.com/KuroNekoTNG/LogManager</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

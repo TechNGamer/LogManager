@@ -1,15 +1,63 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Utilities.Log {
+
 	/// <summary>
 	/// This class acts as a middle man to the log files.
 	/// This enables the logs to help tell the person looking at it where a message came from.
 	/// All messages will be passed to the actual log manager with this format: mm/dd/yy HH:mm:ss '[Full name of class' said: [message]
 	/// </summary>
 	public class LogTalker {
+
+		#region Static
+
+		/// <summary>
+		/// Exposes the log folder location.
+		/// </summary>
+		public static string LogFolder {
+			get {
+				return LogManager.LogFolder;
+			}
+		}
+
+		/// <summary>
+		/// Exposes the verbose.log file location.
+		/// </summary>
+		public static string VerboseLog {
+			get {
+				return LogManager.VerboseLog;
+			}
+		}
+
+		/// <summary>
+		/// Exposes the verbose.log file location.
+		/// </summary>
+		public static string ErrorLog {
+			get {
+				return LogManager.ErrorLog;
+			}
+		}
+
+		/// <summary>
+		/// Exposes the error.log file location.
+		/// </summary>
+		public static string ExceptionLog {
+			get {
+				return LogManager.ExceptionLog;
+			}
+		}
+
+		/// <summary>
+		/// Exposes the exception.log file location.
+		/// </summary>
+		public static Encoding LogEncoding {
+			get {
+				return LogManager.LogEncoding;
+			}
+		}
+
+		#endregion
 
 		/// <summary>
 		/// The name of the object that this object will be representing in the logs.
@@ -35,7 +83,7 @@ namespace Utilities.Log {
 		/// This constructor makes it more specific to which object by also including the objects hash code.
 		/// </summary>
 		/// <param name="o">The object you wish to be represented.</param>
-		public LogTalker( object o ) : this(o.GetType()) {
+		public LogTalker( object o ) : this( o.GetType() ) {
 			RepresentName = $"{RepresentName}@{o.GetHashCode()}";
 		}
 
