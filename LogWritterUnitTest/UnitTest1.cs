@@ -11,6 +11,9 @@ namespace LogWritterUnitTest {
 			log.WriteVerbose( "*notices buldge*" );
 			log.WriteError( "OwO What's this?" );
 			log.WriteException( "UwU I didn't mwen to ovew stwep.", false );
+
+			//log.Close(); See the obsolete message.
+			LogTalker.FinishWriting();
 		}
 	}
 }

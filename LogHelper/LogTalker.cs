@@ -56,6 +56,13 @@ namespace Utilities.Log {
 				return LogManager.LogEncoding;
 			}
 		}
+		
+		/// <summary>
+		/// Tells LogManager to signal to the logging thread to finish writing and terminate.
+		/// </summary>
+		public static void FinishWriting() {
+			LogManager.Singleton.SignalThreadToClose();
+		}
 
 		#endregion
 
@@ -135,8 +142,9 @@ namespace Utilities.Log {
 		}
 
 		/// <summary>
-		/// Tells the object to stop writing to the thread.
+		/// Tells the LogManager to signal to the logging thread to write everything and terminate.
 		/// </summary>
+		[Obsolete("Use LogTalker.FinishWriting() instead.")]
 		public void Close() {
 			logManager.SignalThreadToClose();
 		}

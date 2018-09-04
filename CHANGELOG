@@ -10,3 +10,9 @@ v1.0.1 (Master):
 
 v1.0.2 (Master):
 - Ensured that each line that LogManager gets ends with '\n'.
+
+v1.0.3 (Master):
+- Added LogTalker.FinishWriting().
+	- Added the Obsolete Attribute to LogTalker.Close().
+	- It is recommended to use LogTalker.FinishWriting() as it does not require creating a new object.
+
