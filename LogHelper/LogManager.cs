@@ -71,7 +71,7 @@ namespace Utilities.Log {
 
 		// Queue's up the messages for writting later by the logging thread.
 		public void QueueMessage( string message, MessageStatus status ) {
-			message = $"{DateTime.Now.ToString( "MM/dd/yy HH:mm:ss" )} {message}"; // Rewrites the message to include the date and time.
+			message = $"{DateTime.Now.ToString( "MM/dd/yy HH:mm:ss" )} {message}\n"; // Rewrites the message to include the date and time.
 
 			switch( status ) {
 				case MessageStatus.Verbose:
