@@ -7,3 +7,6 @@ v1.0.0 (Master):
 v1.0.1 (Master):
 - Exposes log file locations.
 - Exposes log folder location.
+
+v1.0.2 (Master):
+- Ensured that each line that LogManager gets ends with '\n'.
