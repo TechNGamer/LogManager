@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if DEBUG
+using System.Diagnostics; 
+#endif
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -152,8 +155,14 @@ namespace Utilities.Log {
 
 					messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
 					stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
+
+#if DEBUG
+					Debug.WriteLine( $"Writing message '{message}' to file '{stream.Name}'." );
+#endif
 				}
 			}
+
+			stream.Flush( true ); // This is needed for .NET Core because with .NET Framework, it writes to the file.
 		}
 
 		#endregion

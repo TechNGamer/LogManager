@@ -11,10 +11,15 @@
     <PackageProjectUrl>https://gitlab.com/KuroNekoTNG/LogManager</PackageProjectUrl>
     <RepositoryUrl>https://gitlab.com/KuroNekoTNG/LogManager</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <AutoGenerateBindingRedirects>False</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>E:\Source Code\C#\LogManager\LogHelper\LogHelper.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>
