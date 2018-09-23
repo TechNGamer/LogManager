@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 #if DEBUG
-using System.Diagnostics; 
+using System.Diagnostics;
 #endif
 using System.IO;
 using System.Text;
@@ -22,7 +22,7 @@ namespace Utilities.Log {
 		// Where internal classes can get the singleton of this class from.
 		public static LogManager Singleton {
 			get {
-				if( singleton is null ) { // Checks to see if the singleton has not been made.
+				if ( singleton is null ) { // Checks to see if the singleton has not been made.
 					singleton = new LogManager(); // Assigns a new LogManager as a singleton.
 				}
 
@@ -61,7 +61,7 @@ namespace Utilities.Log {
 				Priority = ThreadPriority.Lowest
 			};
 
-			if( !Directory.Exists( LogFolder ) ) { // Checks to see if the log folder is already made.
+			if ( !Directory.Exists( LogFolder ) ) { // Checks to see if the log folder is already made.
 				Directory.CreateDirectory( LogFolder ); // Creates the log folder if it has not been made.
 			}
 
@@ -69,30 +69,37 @@ namespace Utilities.Log {
 			errorStream = new FileStream( ErrorLog, FileMode.Create ); // Opens the error file for writing.
 			exceptionStream = new FileStream( ExceptionLog, FileMode.Create ); // Opens the exception file for writing.
 
+			AppDomain.CurrentDomain.ProcessExit += StopLogging;
+
 			logThread.Start();
+		}
+
+		// Used to automatically kill the logging thread.
+		private void StopLogging( object sender, EventArgs e ) {
+			terminate.Set(); // Set's a flag that the thread should close.
 		}
 
 		// Queue's up the messages for writting later by the logging thread.
 		public void QueueMessage( string message, MessageStatus status ) {
 			message = $"{DateTime.Now.ToString( "MM/dd/yy HH:mm:ss" )} {message}\n"; // Rewrites the message to include the date and time.
 
-			switch( status ) {
+			switch ( status ) {
 				case MessageStatus.Verbose:
-					lock( normalMessageQueue ) { // Locks the queue so it can queue the message up.
+					lock ( normalMessageQueue ) { // Locks the queue so it can queue the message up.
 						normalMessageQueue.Enqueue( message );
 					}
 
 					normalMessageWaiting.Set(); // Raises the flag.
 					break;
 				case MessageStatus.Error:
-					lock( errorMessageQueue ) { // Locks the queue so it can queue the message up.
+					lock ( errorMessageQueue ) { // Locks the queue so it can queue the message up.
 						errorMessageQueue.Enqueue( message );
 					}
 
 					errorMessageWaiting.Set(); // Raises the flag.
 					break;
 				case MessageStatus.Exception:
-					lock( exceptionMessageQueue ) { // Locks the queue so it can queue the message up.
+					lock ( exceptionMessageQueue ) { // Locks the queue so it can queue the message up.
 						exceptionMessageQueue.Enqueue( message );
 					}
 
@@ -104,8 +111,14 @@ namespace Utilities.Log {
 		}
 
 		// Used to tell the logging thread to close.
+		[Obsolete( "This method is obsolete as the LogManager now subscribes to AppDomain.CurrentDomain.ProcessExit.", true )]
 		public void SignalThreadToClose() {
-			terminate.Set();
+			terminate.Set(); // Set's a flag that the thread should close.
+		}
+
+		// Forces the thread to close.
+		public void ForceThreadToClose() {
+			logThread.Abort(); // Aborts the thread.
 		}
 
 		#region Thread Methods
@@ -114,13 +127,13 @@ namespace Utilities.Log {
 		private void WrittingThreadMethod() {
 			int i;
 
-			while( true ) { // Infinite loop motherfucker, one is needed here.
+			while ( true ) { // Infinite loop motherfucker, one is needed here.
 
 				// Waits until a flag is raised with one of these.
 				i = WaitHandle.WaitAny( new WaitHandle[] { normalMessageWaiting, errorMessageWaiting, exceptionMessageWaiting, terminate } );
 
 				// Sees which one of these raised.
-				switch( i ) {
+				switch ( i ) {
 					case 0:
 						WriteToStream( verboseStream, normalMessageQueue ); // Passes the verbose stream and the normal message queue to be locked and written to file.
 						normalMessageWaiting.Reset(); // Resets the flag.
@@ -149,8 +162,8 @@ namespace Utilities.Log {
 			string message;
 			byte[] messageBytes;
 
-			lock( dequeueFrom ) { // Locks the queue so it can dequeue things off of it.
-				while( dequeueFrom.Count > 0 ) { // Loops through the queue until it's empty.
+			lock ( dequeueFrom ) { // Locks the queue so it can dequeue things off of it.
+				while ( dequeueFrom.Count > 0 ) { // Loops through the queue until it's empty.
 					message = dequeueFrom.Dequeue();
 
 					messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.

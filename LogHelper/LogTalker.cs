@@ -59,9 +59,23 @@ namespace Utilities.Log {
 
 		/// <summary>
 		/// Tells LogManager to signal to the logging thread to finish writing and terminate.
+		/// If you wish to force close the logging thread (not recommended), use <see cref="ForceThreadClosure"/>.
 		/// </summary>
+		[Obsolete("This method is obsolete as it calls an obsolete method in LogManager.", true)]
 		public static void FinishWriting() {
-			LogManager.Singleton.SignalThreadToClose();
+			//LogManager.Singleton.SignalThreadToClose();
+		}
+
+		/// <summary>
+		/// Forces the logging thread to close.
+		/// It is only recommended to use this if it causes the program to lock up.
+		/// </summary>
+		public static void ForceThreadClosure() {
+			try {
+				LogManager.Singleton.ForceThreadToClose();
+			} catch {
+
+			}
 		}
 
 		#endregion
