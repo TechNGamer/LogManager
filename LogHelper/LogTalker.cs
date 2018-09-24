@@ -175,10 +175,6 @@ namespace Utilities.Log {
 			Console.ForegroundColor = ConsoleColor.Red; // This is to show that something happened.
 			Console.BackgroundColor = ConsoleColor.Black; // This is to help the contrast.
 			Console.WriteLine( message ); // Writes the message out and ending it with a definitive new line.
-			Console.ResetColor(); // Resets the colors back.
-			Console.Write( "Please press any key to quit. . ." ); // Tells the user to press any key to make the program quit.
-			Console.ReadKey( true ); // Tells the console to hand it which key is being pressed and to not print that key out to the console.
-			Environment.Exit( -1 ); // Exits and passes -1 to indicate that the program failed.
 		}
 	}
 }

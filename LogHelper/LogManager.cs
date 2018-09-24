@@ -156,9 +156,9 @@ namespace Utilities.Log {
 					messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
 					stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
 
-#if DEBUG
-					Debug.WriteLine( $"Writing message '{message}' to file '{stream.Name}'." );
-#endif
+//#if DEBUG
+//					Debug.WriteLine( $"Writing message '{message}' to file '{stream.Name}'." );
+//#endif
 				}
 			}
 

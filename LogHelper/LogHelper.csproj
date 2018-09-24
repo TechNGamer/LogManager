@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>E:\Source Code\C#\LogManager\LogHelper\LogHelper.xml</DocumentationFile>
+    <DocumentationFile>LogHelper.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>
