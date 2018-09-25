@@ -111,7 +111,7 @@ namespace Utilities.Log {
 		}
 
 		// Used to tell the logging thread to close.
-		[Obsolete( "This method is obsolete as the LogManager now subscribes to AppDomain.CurrentDomain.ProcessExit.", true )]
+		[Obsolete( "This method is obsolete as the LogManager now subscribes to AppDomain.CurrentDomain.ProcessExit." )]
 		public void SignalThreadToClose() {
 			terminate.Set(); // Set's a flag that the thread should close.
 		}

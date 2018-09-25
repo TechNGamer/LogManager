@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Utilities.Log {
@@ -59,23 +60,10 @@ namespace Utilities.Log {
 
 		/// <summary>
 		/// Tells LogManager to signal to the logging thread to finish writing and terminate.
-		/// If you wish to force close the logging thread (not recommended), use <see cref="ForceThreadClosure"/>.
 		/// </summary>
-		[Obsolete("This method is obsolete as it calls an obsolete method in LogManager.", true)]
+		[Obsolete( "This method is most likely not needed." )]
 		public static void FinishWriting() {
-			//LogManager.Singleton.SignalThreadToClose();
-		}
-
-		/// <summary>
-		/// Forces the logging thread to close.
-		/// It is only recommended to use this if it causes the program to lock up.
-		/// </summary>
-		public static void ForceThreadClosure() {
-			try {
-				LogManager.Singleton.ForceThreadToClose();
-			} catch {
-
-			}
+			LogManager.Singleton.SignalThreadToClose();
 		}
 
 		#endregion
@@ -101,8 +89,6 @@ namespace Utilities.Log {
 			logManager = LogManager.Singleton;
 
 			this.printToConsole = printToConsole;
-
-			logManager.QueueMessage( $"'{GetType().FullName}' representing '{RepresentName}' is up.", MessageStatus.Verbose );
 		}
 
 		/// <summary>
@@ -111,8 +97,17 @@ namespace Utilities.Log {
 		/// </summary>
 		/// <param name="o">The object you wish to be represented.</param>
 		/// <param name="printToConsole">A boolean for rather every call will print to the console.</param>
-		public LogTalker( object o, bool printToConsole = false ) : this( o.GetType(), printToConsole ) {
-			RepresentName = $"{RepresentName}@{o.GetHashCode()}";
+		public LogTalker( in object o, bool printToConsole = false ) : this( o.GetType(), printToConsole ) {
+			unsafe {
+				GCHandle objHandle = GCHandle.Alloc( o, GCHandleType.Weak );
+				IntPtr address = GCHandle.ToIntPtr( objHandle );
+
+				if ( Environment.Is64BitProcess ) {
+					RepresentName = $"{RepresentName}@0x{address.ToInt64().ToString( "x" )}";
+				} else {
+					RepresentName = $"{RepresentName}@0x{address.ToInt32().ToString( "x" )}";
+				}
+			}
 		}
 
 		/// <summary>

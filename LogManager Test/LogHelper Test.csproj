@@ -7,6 +7,8 @@
     <IsPackable>false</IsPackable>
 
     <AssemblyName>LogHelper Test</AssemblyName>
+
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

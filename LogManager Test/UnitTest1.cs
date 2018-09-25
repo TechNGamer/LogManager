@@ -10,7 +10,8 @@ namespace LogHelperTest {
 	public class UnitTest1 {
 		[TestMethod]
 		public void LogTalkerTest() {
-			LogTalker log = new LogTalker( this, false );
+			UnitTest1 thisTest = this;
+			LogTalker log = new LogTalker( thisTest, false );
 			Stopwatch stopWatch = Stopwatch.StartNew();
 
 			Console.WriteLine( $"Rep name: {log.RepresentName}" );
