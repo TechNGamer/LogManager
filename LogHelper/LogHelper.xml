@@ -4,6 +4,12 @@
         <name>LogHelper</name>
     </assembly>
     <members>
+        <member name="M:Utilities.Log.LogManager.SetUpLogs(System.String@)">
+            <summary>
+            Set's up the log files and folder for use.
+            </summary>
+            <param name="programName">The name of the program.</param>
+        </member>
         <member name="T:Utilities.Log.LogTalker">
             <summary>
             This class acts as a middle man to the log files.
@@ -39,6 +45,13 @@
         <member name="M:Utilities.Log.LogTalker.FinishWriting">
             <summary>
             Tells LogManager to signal to the logging thread to finish writing and terminate.
+            If you wish to force close the logging thread (not recommended), use <see cref="M:Utilities.Log.LogTalker.ForceThreadClosure"/>.
+            </summary>
+        </member>
+        <member name="M:Utilities.Log.LogTalker.ForceThreadClosure">
+            <summary>
+            Forces the logging thread to close.
+            It is only recommended to use this if it causes the program to lock up.
             </summary>
         </member>
         <member name="P:Utilities.Log.LogTalker.RepresentName">
@@ -46,18 +59,20 @@
             The name of the object that this object will be representing in the logs.
             </summary>
         </member>
-        <member name="M:Utilities.Log.LogTalker.#ctor(System.Type)">
+        <member name="M:Utilities.Log.LogTalker.#ctor(System.Type,System.Boolean)">
             <summary>
             Creates a new LogTalker for the Type passed to it.
             </summary>
             <param name="t">The type of the object.</param>
+            <param name="printToConsole">A boolean for rather every call will print to the console.</param>
         </member>
-        <member name="M:Utilities.Log.LogTalker.#ctor(System.Object)">
+        <member name="M:Utilities.Log.LogTalker.#ctor(System.Object,System.Boolean)">
             <summary>
             Creates a new LogTalker for the object passed to it.
             This constructor makes it more specific to which object by also including the objects hash code.
             </summary>
             <param name="o">The object you wish to be represented.</param>
+            <param name="printToConsole">A boolean for rather every call will print to the console.</param>
         </member>
         <member name="M:Utilities.Log.LogTalker.WriteVerbose(System.String)">
             <summary>
@@ -84,7 +99,7 @@
             Writes any messages passed to it to the exception log.
             By default, <paramref name="crash"/> is default true, meaning that it will print the message to the console if present.
             <paramref name="e"/> will be incorperated into the message before being written to the log file.
-            <seealso cref="M:Utilities.Log.LogTalker.WriteException(System.String,System.Boolean)"/>
+            See also: <seealso cref="M:Utilities.Log.LogTalker.WriteException(System.String,System.Boolean)"/>
             </summary>
             <param name="message">The message the will be written to exception.log.</param>
             <param name="e">The exception that will be incorperated into the message.</param>

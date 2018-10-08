@@ -12,6 +12,7 @@
     <RepositoryUrl>https://gitlab.com/KuroNekoTNG/LogManager</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AutoGenerateBindingRedirects>False</AutoGenerateBindingRedirects>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
