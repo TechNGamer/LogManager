@@ -45,13 +45,6 @@
         <member name="M:Utilities.Log.LogTalker.FinishWriting">
             <summary>
             Tells LogManager to signal to the logging thread to finish writing and terminate.
-            If you wish to force close the logging thread (not recommended), use <see cref="M:Utilities.Log.LogTalker.ForceThreadClosure"/>.
-            </summary>
-        </member>
-        <member name="M:Utilities.Log.LogTalker.ForceThreadClosure">
-            <summary>
-            Forces the logging thread to close.
-            It is only recommended to use this if it causes the program to lock up.
             </summary>
         </member>
         <member name="P:Utilities.Log.LogTalker.RepresentName">
@@ -66,7 +59,7 @@
             <param name="t">The type of the object.</param>
             <param name="printToConsole">A boolean for rather every call will print to the console.</param>
         </member>
-        <member name="M:Utilities.Log.LogTalker.#ctor(System.Object,System.Boolean)">
+        <member name="M:Utilities.Log.LogTalker.#ctor(System.Object@,System.Boolean)">
             <summary>
             Creates a new LogTalker for the object passed to it.
             This constructor makes it more specific to which object by also including the objects hash code.
