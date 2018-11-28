@@ -204,20 +204,20 @@ namespace Utilities.Log {
 			string message;
 			byte[] messageBytes;
 
-			using ( stream ) {
-				lock ( dequeueFrom ) { // Locks the queue so it can dequeue things off of it.
-					while ( dequeueFrom.Count > 0 ) { // Loops through the queue until it's empty.
-						message = dequeueFrom.Dequeue();
+			lock ( dequeueFrom ) { // Locks the queue so it can dequeue things off of it.
+				while ( dequeueFrom.Count > 0 ) { // Loops through the queue until it's empty.
+					message = dequeueFrom.Dequeue();
 
-						messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
-						stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
+					messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
+					stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
 
 #if DEBUG
 						Debug.WriteLine( $"Writing message '{message}' to file '{stream.Name}'." );
 #endif
-					}
 				}
 			}
+
+			stream.Flush( true );
 		}
 
 		#endregion
