@@ -153,7 +153,7 @@ namespace Utilities.Log {
 		}
 
 		// Used to tell the logging thread to close.
-		[Obsolete( "This method is obsolete as the LogManager now subscribes to AppDomain.CurrentDomain.ProcessExit." )]
+		[Obsolete( "LogManager now subscribes to AppDomain.CurrentDomain.ProcessExit. The reason it is staying here is for backwards compatibility." )]
 		public void SignalThreadToClose() {
 			terminate.Set(); // Set's a flag that the thread should close.
 		}
@@ -167,15 +167,15 @@ namespace Utilities.Log {
 
 		// This method, as the name implys, is the method that will be running on a seperate thread.
 		private void WrittingThreadMethod() {
-			int i;
+			int waitKey;
 
 			while ( true ) { // Infinite loop motherfucker, one is needed here.
 
 				// Waits until a flag is raised with one of these.
-				i = WaitHandle.WaitAny( new WaitHandle[] { normalMessageWaiting, errorMessageWaiting, exceptionMessageWaiting, terminate } );
+				waitKey = WaitHandle.WaitAny( new WaitHandle[] { normalMessageWaiting, errorMessageWaiting, exceptionMessageWaiting, terminate } );
 
 				// Sees which one of these raised.
-				switch ( i ) {
+				switch ( waitKey ) {
 					case 0:
 						WriteToStream( verboseStream, normalMessageQueue ); // Passes the verbose stream and the normal message queue to be locked and written to file.
 						normalMessageWaiting.Reset(); // Resets the flag.
@@ -204,20 +204,20 @@ namespace Utilities.Log {
 			string message;
 			byte[] messageBytes;
 
-			lock ( dequeueFrom ) { // Locks the queue so it can dequeue things off of it.
-				while ( dequeueFrom.Count > 0 ) { // Loops through the queue until it's empty.
-					message = dequeueFrom.Dequeue();
+			using ( stream ) {
+				lock ( dequeueFrom ) { // Locks the queue so it can dequeue things off of it.
+					while ( dequeueFrom.Count > 0 ) { // Loops through the queue until it's empty.
+						message = dequeueFrom.Dequeue();
 
-					messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
-					stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
+						messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
+						stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
 
-//#if DEBUG
-//					Debug.WriteLine( $"Writing message '{message}' to file '{stream.Name}'." );
-//#endif
+#if DEBUG
+						Debug.WriteLine( $"Writing message '{message}' to file '{stream.Name}'." );
+#endif
+					}
 				}
 			}
-
-			stream.Flush( true ); // This is needed for .NET Core because with .NET Framework, it writes to the file.
 		}
 
 		#endregion

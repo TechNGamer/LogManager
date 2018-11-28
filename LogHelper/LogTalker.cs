@@ -61,7 +61,7 @@ namespace Utilities.Log {
 		/// <summary>
 		/// Tells LogManager to signal to the logging thread to finish writing and terminate.
 		/// </summary>
-		[Obsolete( "This method is most likely not needed." )]
+		[Obsolete( "Automatically starts to finish writing one it detects the AppDomain closing. Staying for backwards compatibility." )]
 		public static void FinishWriting() {
 			LogManager.Singleton.SignalThreadToClose();
 		}
