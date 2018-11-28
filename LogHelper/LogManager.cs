@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 #endif
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 
@@ -30,11 +31,27 @@ namespace Utilities.Log {
 			}
 		}
 
-		public static readonly string LogFolder = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Log" ); // Where the log folder is at.
-		public static readonly string VerboseLog = Path.Combine( LogFolder, "verbose.log" ); // Where the verbose log is at.
-		public static readonly string ErrorLog = Path.Combine( LogFolder, "error.log" ); // Where the error log it at.
-		public static readonly string ExceptionLog = Path.Combine( LogFolder, "exception.log" ); // Where the exception log is at.
-		public static readonly Encoding LogEncoding = Encoding.UTF8; // What encoding it uses.
+		public static string LogFolder { // Where the log folder is at.
+			get;
+			private set;
+		}
+
+		public static string VerboseLog { // Where the verbose log is at.
+			get;
+			private set;
+		}
+
+		public static string ErrorLog { // Where the error log it at.
+			get;
+			private set;
+		}
+
+		public static string ExceptionLog { // Where the exception log is at.
+			get;
+			private set;
+		}
+
+		public static readonly Encoding LogEncoding = Encoding.BigEndianUnicode; // What encoding it uses.
 
 		private static LogManager singleton; // The singleton.
 
@@ -57,21 +74,46 @@ namespace Utilities.Log {
 
 		// Private constructor allows for the object to only have one of it exist.
 		private LogManager() {
-			logThread = new Thread( () => WrittingThreadMethod() ) {
-				Priority = ThreadPriority.Lowest
+			string programName = Assembly.GetEntryAssembly().GetName().Name;
+
+			logThread = new Thread( () => WrittingThreadMethod() ) { // Creates a new Thread that calls WrittingThreadMethod().
+				Priority = ThreadPriority.Lowest // Set's the thread to lowest priority to prevent blocking.
 			};
+
+			SetUpLogs( programName ); // See method's doc comment.
+
+			// Opens the verbose file for writing and allows other programs to read the file while the program is able to write to it.
+			verboseStream = new FileStream( VerboseLog, FileMode.Create, FileAccess.Write, FileShare.Read );
+			// Opens the error file for writing and allows other programs to read the file while the program is able to write to it.
+			errorStream = new FileStream( ErrorLog, FileMode.Create, FileAccess.Write, FileShare.Read );
+			// Opens the exception file for writing and allows other programs to read the file while the program is able to write to it.
+			exceptionStream = new FileStream( ExceptionLog, FileMode.Create, FileAccess.Write, FileShare.Read );
+
+			AppDomain.CurrentDomain.ProcessExit += StopLogging; // Enables automatic execution of calling to stop the logging thread.
+
+			logThread.Start(); // Starts the logging thread.
+		}
+
+		/// <summary>
+		/// Set's up the log files and folder for use.
+		/// </summary>
+		/// <param name="programName">The name of the program.</param>
+		private void SetUpLogs( in string programName ) {
+			if ( Environment.OSVersion.Platform == PlatformID.Unix ) { // Checks to see if the platform is Unix/Unix-like.
+				LogFolder = Path.Combine( "/var/log", programName ); // Creates the log folder at /var/log/[program name].
+			} else if ( Environment.OSVersion.Platform == PlatformID.Win32NT ) { // Checks to see if the platform is Windows.
+				LogFolder = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData ), programName, "logs" );
+			} else { // Otherwise, if it is an unkown platform, create the log folder at the executable location.
+				LogFolder = Path.Combine( Assembly.GetEntryAssembly().Location, "logs" );
+			}
+
+			VerboseLog = Path.Combine( LogFolder, "verbose.log" ); // Creates the path for the verbose log file.
+			ErrorLog = Path.Combine( LogFolder, "error.log" ); // Creates the path for the error log file.
+			ExceptionLog = Path.Combine( LogFolder, "exception.log" ); // Creates the path for the exception log fille.
 
 			if ( !Directory.Exists( LogFolder ) ) { // Checks to see if the log folder is already made.
 				Directory.CreateDirectory( LogFolder ); // Creates the log folder if it has not been made.
 			}
-
-			verboseStream = new FileStream( VerboseLog, FileMode.Create ); // Opens the verbose file for writing.
-			errorStream = new FileStream( ErrorLog, FileMode.Create ); // Opens the error file for writing.
-			exceptionStream = new FileStream( ExceptionLog, FileMode.Create ); // Opens the exception file for writing.
-
-			AppDomain.CurrentDomain.ProcessExit += StopLogging;
-
-			logThread.Start();
 		}
 
 		// Used to automatically kill the logging thread.
@@ -81,7 +123,7 @@ namespace Utilities.Log {
 
 		// Queue's up the messages for writting later by the logging thread.
 		public void QueueMessage( string message, MessageStatus status ) {
-			message = $"{DateTime.Now.ToString( "MM/dd/yy HH:mm:ss" )} {message}\n"; // Rewrites the message to include the date and time.
+			message = $"{DateTime.Now.ToString( "MM/dd/yyyy HH:mm:ss" )} {message}\n"; // Rewrites the message to include the date and time.
 
 			switch ( status ) {
 				case MessageStatus.Verbose:
@@ -162,20 +204,20 @@ namespace Utilities.Log {
 			string message;
 			byte[] messageBytes;
 
-			using ( stream ) {
-				lock ( dequeueFrom ) { // Locks the queue so it can dequeue things off of it.
-					while ( dequeueFrom.Count > 0 ) { // Loops through the queue until it's empty.
-						message = dequeueFrom.Dequeue();
+			lock ( dequeueFrom ) { // Locks the queue so it can dequeue things off of it.
+				while ( dequeueFrom.Count > 0 ) { // Loops through the queue until it's empty.
+					message = dequeueFrom.Dequeue();
 
-						messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
-						stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
+					messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
+					stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
 
 #if DEBUG
 						Debug.WriteLine( $"Writing message '{message}' to file '{stream.Name}'." );
 #endif
-					}
 				}
 			}
+
+			stream.Flush( true );
 		}
 
 		#endregion

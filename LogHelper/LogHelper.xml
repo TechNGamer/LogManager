@@ -4,6 +4,12 @@
         <name>LogHelper</name>
     </assembly>
     <members>
+        <member name="M:Utilities.Log.LogManager.SetUpLogs(System.String@)">
+            <summary>
+            Set's up the log files and folder for use.
+            </summary>
+            <param name="programName">The name of the program.</param>
+        </member>
         <member name="T:Utilities.Log.LogTalker">
             <summary>
             This class acts as a middle man to the log files.
