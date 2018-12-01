@@ -59,9 +59,17 @@ namespace Utilities.Log {
 		}
 
 		/// <summary>
+		/// Used to notify classes/objects that the LogManager has outputted a new message to the log file.
+		/// </summary>
+		public LogManager.WritingMessage WritingMessage {
+			get => logManager.writingMessage;
+			set => logManager.writingMessage += value;
+		}
+
+		/// <summary>
 		/// Tells LogManager to signal to the logging thread to finish writing and terminate.
 		/// </summary>
-		[Obsolete( "Automatically starts to finish writing one it detects the AppDomain closing. Staying for backwards compatibility." )]
+		[Obsolete( "Automatically starts to finish writing when it detects the AppDomain closing. Staying for backwards compatibility." )]
 		public static void FinishWriting() {
 			LogManager.Singleton.SignalThreadToClose();
 		}
@@ -81,9 +89,50 @@ namespace Utilities.Log {
 
 		/// <summary>
 		/// Creates a new LogTalker for the Type passed to it.
+		/// This constructor is great for static classes.
+		/// </summary>
+		/// <param name="t">The type of the object.</param>
+		public LogTalker( in Type t ) {
+			RepresentName = t.FullName; // Grabs the full name of the class.
+			logManager = LogManager.Singleton; // Grabs the reference to the LogManager.
+		}
+
+		/// <summary>
+		/// Creates a new LogTalker for the object passed to it.
+		/// This constructor makes it more specific to which object it is refering to.
+		/// It does this by grabbing the objects address and appending it to the represent name.
+		/// </summary>
+		/// <param name="obj">The object you wish to be represented.</param>
+		public LogTalker( in object obj ) {
+			StringBuilder builder = new StringBuilder( obj.GetType().FullName ).Append( "@ 0x" ); // Creates a new StringBuilder with the object's type full name and appends the @ 0x.
+			GCHandle objHandle; // Will be used later.
+			IntPtr objPtr; // Will be used later.
+
+			logManager = LogManager.Singleton; // Grabs the reference to the LogManager.
+
+			unsafe {
+				objHandle = GCHandle.Alloc( obj, GCHandleType.Weak ); // Grabs the obj's Garbage Collection Handle with a weak type.
+				objPtr = GCHandle.ToIntPtr( objHandle ); // Takes the handle and get's an int pointer.
+
+				if ( Environment.Is64BitProcess ) { // Checks to see if program is running in x64 mode.
+					builder.Append( objPtr.ToInt64().ToString( "x" ) ); // Grabs the hex string of the long.
+				} else {
+					builder.Append( objPtr.ToInt32().ToString( "x" ) ); // Grabs the hex string of the int.
+				}
+			}
+
+			RepresentName = builder.ToString(); // Set's the represent name to the string builder's output.
+		}
+
+		#region Obsolete Constructors
+
+		/// <summary>
+		/// Creates a new LogTalker for the Type passed to it.
+		/// Comes with the option to print out the message sent to it to the console.
 		/// </summary>
 		/// <param name="t">The type of the object.</param>
 		/// <param name="printToConsole">A boolean for rather every call will print to the console.</param>
+		[Obsolete( "Use of printing out to the console will work, but please use LogTalker.MessageWriting delegate." )]
 		public LogTalker( Type t, bool printToConsole = false ) {
 			RepresentName = t.FullName;
 			logManager = LogManager.Singleton;
@@ -97,18 +146,25 @@ namespace Utilities.Log {
 		/// </summary>
 		/// <param name="o">The object you wish to be represented.</param>
 		/// <param name="printToConsole">A boolean for rather every call will print to the console.</param>
+		[Obsolete( "Use of printing out to the console will work, but please use LogTalker.MessageWriting delegate." )]
 		public LogTalker( in object o, bool printToConsole = false ) : this( o.GetType(), printToConsole ) {
-			unsafe {
-				GCHandle objHandle = GCHandle.Alloc( o, GCHandleType.Weak );
-				IntPtr address = GCHandle.ToIntPtr( objHandle );
+			StringBuilder builder = new StringBuilder( RepresentName ).Append( "@0x" );
 
-				if ( Environment.Is64BitProcess ) {
-					RepresentName = $"{RepresentName}@0x{address.ToInt64().ToString( "x" )}";
+			unsafe { // Indicates to .NET that some unsafe code is going to happen.
+				GCHandle objHandle = GCHandle.Alloc( o, GCHandleType.Weak );  // Grabs a new Grabage Collection Handle for the object o with a weak handle.
+				IntPtr address = GCHandle.ToIntPtr( objHandle ); // Get's the address of the object handle.
+
+				if ( Environment.Is64BitProcess ) { // Checks to see if process is running in x64.
+					builder.Append( address.ToInt64().ToString( "x" ) ); // Grabs the hex version of the long.
 				} else {
-					RepresentName = $"{RepresentName}@0x{address.ToInt32().ToString( "x" )}";
+					builder.Append( address.ToInt32().ToString( "x" ) ); // Grabs the hex version of the int.
 				}
 			}
+
+			RepresentName = builder.ToString(); // Reassigns the represent property to the new one.
 		}
+
+		#endregion
 
 		/// <summary>
 		/// Writes any messages passed to it to the verbose log.

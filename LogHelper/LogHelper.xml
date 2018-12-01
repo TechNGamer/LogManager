@@ -4,11 +4,74 @@
         <name>LogHelper</name>
     </assembly>
     <members>
-        <member name="M:Utilities.Log.LogManager.SetUpLogs(System.String@)">
+        <member name="T:Utilities.Log.MessageStatus">
             <summary>
-            Set's up the log files and folder for use.
+            This tells the LogManager where to put the messages it recieves without having 3 seperate methods.
+            It also tells methods that are part of the WritingMessage delegate of what type the message is.
             </summary>
-            <param name="programName">The name of the program.</param>
+        </member>
+        <member name="F:Utilities.Log.MessageStatus.Verbose">
+            <summary>
+            Indicates that the message is just a verbose message.
+            </summary>
+        </member>
+        <member name="F:Utilities.Log.MessageStatus.Error">
+            <summary>
+            Indicates that the message is an error message.
+            </summary>
+        </member>
+        <member name="F:Utilities.Log.MessageStatus.Exception">
+            <summary>
+            Indicates that the message came from an exception.
+            </summary>
+        </member>
+        <member name="T:Utilities.Log.LogManager">
+            <summary>
+            The LogManager handles all communication to the logs.
+            Please note that this is a singleton, however the singleton is only accessable via classes in the LogHelper assembly.
+            </summary>
+        </member>
+        <member name="P:Utilities.Log.LogManager.LogFolder">
+            <summary>
+            The location of the log folder.
+            </summary>
+        </member>
+        <member name="P:Utilities.Log.LogManager.VerboseLog">
+            <summary>
+            The path to the verbose log file.
+            </summary>
+        </member>
+        <member name="P:Utilities.Log.LogManager.ErrorLog">
+            <summary>
+            The path to the error log file.
+            </summary>
+        </member>
+        <member name="P:Utilities.Log.LogManager.ExceptionLog">
+            <summary>
+            The path to the error log file.
+            </summary>
+        </member>
+        <member name="F:Utilities.Log.LogManager.LogEncoding">
+            <summary>
+            Get's the encoding type the log files are written in.
+            </summary>
+        </member>
+        <member name="T:Utilities.Log.LogManager.WritingMessage">
+            <summary>
+            This delegate provides the message and the type of the message to all methods.
+            </summary>
+            <param name="message">The message that was printed out.</param>
+            <param name="status">THe kind of message it was.</param>
+        </member>
+        <member name="F:Utilities.Log.LogManager.writingMessage">
+            <summary>
+            Used to signal to classes/objects that the log manager has written the message to the logs.
+            </summary>
+        </member>
+        <member name="M:Utilities.Log.LogManager.#cctor">
+            <summary>
+            This static constructor set's up the entire class before LogManager is instantiated.
+            </summary>
         </member>
         <member name="T:Utilities.Log.LogTalker">
             <summary>
@@ -42,6 +105,11 @@
             Exposes the exception.log file location.
             </summary>
         </member>
+        <member name="P:Utilities.Log.LogTalker.WritingMessage">
+            <summary>
+            Used to notify classes/objects that the LogManager has outputted a new message to the log file.
+            </summary>
+        </member>
         <member name="M:Utilities.Log.LogTalker.FinishWriting">
             <summary>
             Tells LogManager to signal to the logging thread to finish writing and terminate.
@@ -52,9 +120,25 @@
             The name of the object that this object will be representing in the logs.
             </summary>
         </member>
+        <member name="M:Utilities.Log.LogTalker.#ctor(System.Type@)">
+            <summary>
+            Creates a new LogTalker for the Type passed to it.
+            This constructor is great for static classes.
+            </summary>
+            <param name="t">The type of the object.</param>
+        </member>
+        <member name="M:Utilities.Log.LogTalker.#ctor(System.Object@)">
+            <summary>
+            Creates a new LogTalker for the object passed to it.
+            This constructor makes it more specific to which object it is refering to.
+            It does this by grabbing the objects address and appending it to the represent name.
+            </summary>
+            <param name="obj">The object you wish to be represented.</param>
+        </member>
         <member name="M:Utilities.Log.LogTalker.#ctor(System.Type,System.Boolean)">
             <summary>
             Creates a new LogTalker for the Type passed to it.
+            Comes with the option to print out the message sent to it to the console.
             </summary>
             <param name="t">The type of the object.</param>
             <param name="printToConsole">A boolean for rather every call will print to the console.</param>
