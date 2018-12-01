@@ -9,19 +9,35 @@ using System.Text;
 using System.Threading;
 
 namespace Utilities.Log {
-	// This tells the LogManager where to put the messages it recieves without having 3 seperate methods.
-	internal enum MessageStatus {
+	/// <summary>
+	/// This tells the LogManager where to put the messages it recieves without having 3 seperate methods.
+	/// It also tells methods that are part of the WritingMessage delegate of what type the message is.
+	/// </summary>
+	public enum MessageStatus {
+		/// <summary>
+		/// Indicates that the message is just a verbose message.
+		/// </summary>
 		Verbose = 0,
+		/// <summary>
+		/// Indicates that the message is an error message.
+		/// </summary>
 		Error = 1,
+		/// <summary>
+		/// Indicates that the message came from an exception.
+		/// </summary>
 		Exception = 2
 	}
 
-	// This class manages the log files.
-	internal class LogManager {
+	/// <summary>
+	/// The LogManager handles all communication to the logs.
+	/// Please note that this is a singleton, however the singleton is only accessable via classes in the LogHelper assembly.
+	/// </summary>
+	public class LogManager {
 		#region Static
 
 		// Where internal classes can get the singleton of this class from.
-		public static LogManager Singleton {
+		// The internal keyword is used to as a hack to preven people from creating/getting the LogManager.
+		internal static LogManager Singleton {
 			get {
 				if ( singleton is null ) { // Checks to see if the singleton has not been made.
 					singleton = new LogManager(); // Assigns a new LogManager as a singleton.
@@ -31,26 +47,41 @@ namespace Utilities.Log {
 			}
 		}
 
+		/// <summary>
+		/// The location of the log folder.
+		/// </summary>
 		public static string LogFolder { // Where the log folder is at.
 			get;
 			private set;
 		}
 
+		/// <summary>
+		/// The path to the verbose log file.
+		/// </summary>
 		public static string VerboseLog { // Where the verbose log is at.
 			get;
 			private set;
 		}
 
+		/// <summary>
+		/// The path to the error log file.
+		/// </summary>
 		public static string ErrorLog { // Where the error log it at.
 			get;
 			private set;
 		}
 
+		/// <summary>
+		/// The path to the error log file.
+		/// </summary>
 		public static string ExceptionLog { // Where the exception log is at.
 			get;
 			private set;
 		}
 
+		/// <summary>
+		/// Get's the encoding type the log files are written in.
+		/// </summary>
 		public static readonly Encoding LogEncoding = Encoding.BigEndianUnicode; // What encoding it uses.
 
 		private static LogManager singleton; // The singleton.
@@ -72,15 +103,53 @@ namespace Utilities.Log {
 		// The file streams that will write to their respective files.
 		private FileStream verboseStream, errorStream, exceptionStream;
 
-		// Private constructor allows for the object to only have one of it exist.
-		private LogManager() {
+		/// <summary>
+		/// This delegate provides the message and the type of the message to all methods.
+		/// </summary>
+		/// <param name="message">The message that was printed out.</param>
+		/// <param name="status">THe kind of message it was.</param>
+		public delegate void WritingMessage( string message, MessageStatus status );
+
+		/// <summary>
+		/// Used to signal to classes/objects that the log manager has written the message to the logs.
+		/// </summary>
+		public WritingMessage writingMessage;
+
+		/// <summary>
+		/// This static constructor set's up the entire class before LogManager is instantiated.
+		/// </summary>
+		static LogManager() {
 			string programName = Assembly.GetEntryAssembly().GetName().Name;
 
+#if !DEBUG
+			if ( Environment.OSVersion.Platform == PlatformID.Unix ) { // Checks to see if the platform is Unix/Unix-like.
+				LogFolder = Path.Combine( "/var/log", programName ); // Creates the log folder at /var/log/[program name].
+			} else if ( Environment.OSVersion.Platform == PlatformID.Win32NT ) { // Checks to see if the platform is Windows.
+				LogFolder = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData ), programName, "logs" );
+			} else { // Otherwise, if it is an unkown platform, create the log folder at the executable location.
+				LogFolder = Path.Combine( Assembly.GetEntryAssembly().Location, "logs" );
+			}
+#else
+			LogFolder = Path.Combine( Path.GetDirectoryName( Assembly.GetEntryAssembly().FullName ), "Logs" );
+#endif
+
+
+			VerboseLog = Path.Combine( LogFolder, "verbose.log" ); // Creates the path for the verbose log file.
+			ErrorLog = Path.Combine( LogFolder, "error.log" ); // Creates the path for the error log file.
+			ExceptionLog = Path.Combine( LogFolder, "exception.log" ); // Creates the path for the exception log fille.
+
+			if ( !Directory.Exists( LogFolder ) ) { // Checks to see if the log folder is already made.
+				Directory.CreateDirectory( LogFolder ); // Creates the log folder if it has not been made.
+			}
+		}
+
+		// Private constructor allows for the object to only have one of it exist.
+		private LogManager() {
 			logThread = new Thread( () => WrittingThreadMethod() ) { // Creates a new Thread that calls WrittingThreadMethod().
 				Priority = ThreadPriority.Lowest // Set's the thread to lowest priority to prevent blocking.
 			};
 
-			SetUpLogs( programName ); // See method's doc comment.
+			//SetUpLogs( programName ); // See method's doc comment.
 
 			// Opens the verbose file for writing and allows other programs to read the file while the program is able to write to it.
 			verboseStream = new FileStream( VerboseLog, FileMode.Create, FileAccess.Write, FileShare.Read );
@@ -94,35 +163,13 @@ namespace Utilities.Log {
 			logThread.Start(); // Starts the logging thread.
 		}
 
-		/// <summary>
-		/// Set's up the log files and folder for use.
-		/// </summary>
-		/// <param name="programName">The name of the program.</param>
-		private void SetUpLogs( in string programName ) {
-			if ( Environment.OSVersion.Platform == PlatformID.Unix ) { // Checks to see if the platform is Unix/Unix-like.
-				LogFolder = Path.Combine( "/var/log", programName ); // Creates the log folder at /var/log/[program name].
-			} else if ( Environment.OSVersion.Platform == PlatformID.Win32NT ) { // Checks to see if the platform is Windows.
-				LogFolder = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData ), programName, "logs" );
-			} else { // Otherwise, if it is an unkown platform, create the log folder at the executable location.
-				LogFolder = Path.Combine( Assembly.GetEntryAssembly().Location, "logs" );
-			}
-
-			VerboseLog = Path.Combine( LogFolder, "verbose.log" ); // Creates the path for the verbose log file.
-			ErrorLog = Path.Combine( LogFolder, "error.log" ); // Creates the path for the error log file.
-			ExceptionLog = Path.Combine( LogFolder, "exception.log" ); // Creates the path for the exception log fille.
-
-			if ( !Directory.Exists( LogFolder ) ) { // Checks to see if the log folder is already made.
-				Directory.CreateDirectory( LogFolder ); // Creates the log folder if it has not been made.
-			}
-		}
-
 		// Used to automatically kill the logging thread.
 		private void StopLogging( object sender, EventArgs e ) {
 			terminate.Set(); // Set's a flag that the thread should close.
 		}
 
 		// Queue's up the messages for writting later by the logging thread.
-		public void QueueMessage( string message, MessageStatus status ) {
+		internal void QueueMessage( string message, MessageStatus status ) {
 			message = $"{DateTime.Now.ToString( "MM/dd/yyyy HH:mm:ss" )} {message}\n"; // Rewrites the message to include the date and time.
 
 			switch ( status ) {
@@ -154,16 +201,16 @@ namespace Utilities.Log {
 
 		// Used to tell the logging thread to close.
 		[Obsolete( "LogManager now subscribes to AppDomain.CurrentDomain.ProcessExit. The reason it is staying here is for backwards compatibility." )]
-		public void SignalThreadToClose() {
+		internal void SignalThreadToClose() {
 			terminate.Set(); // Set's a flag that the thread should close.
 		}
 
 		// Forces the thread to close.
-		public void ForceThreadToClose() {
+		internal void ForceThreadToClose() {
 			logThread.Abort(); // Aborts the thread.
 		}
 
-		#region Thread Methods
+#region Thread Methods
 
 		// This method, as the name implys, is the method that will be running on a seperate thread.
 		private void WrittingThreadMethod() {
@@ -200,26 +247,38 @@ namespace Utilities.Log {
 		}
 
 		// Used to lock the queue and write what's in the queue to the thread.
-		private void WriteToStream( FileStream stream, Queue<string> dequeueFrom ) {
+		private void WriteToStream( FileStream stream, Queue<string> queue ) {
 			string message;
 			byte[] messageBytes;
+			MessageStatus status;
 
-			lock ( dequeueFrom ) { // Locks the queue so it can dequeue things off of it.
-				while ( dequeueFrom.Count > 0 ) { // Loops through the queue until it's empty.
-					message = dequeueFrom.Dequeue();
+			lock ( queue ) { // Locks the queue so it can dequeue things off of it.
+
+				if ( queue == normalMessageQueue ) { // Checks to see if queue is the normal/verbose queue.
+					status = MessageStatus.Verbose; // Applies the verbose status.
+				} else if ( queue == errorMessageQueue ) { // Checks to see if queue is the error queue.
+					status = MessageStatus.Error; // Applies the error status.
+				} else {
+					status = MessageStatus.Exception; // Assumes the queue is the exception queue.
+				}
+
+				while ( queue.Count > 0 ) { // Loops through the queue until it's empty.
+					message = queue.Dequeue();
 
 					messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
 					stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
 
-#if DEBUG
-						Debug.WriteLine( $"Writing message '{message}' to file '{stream.Name}'." );
-#endif
+					try {
+						writingMessage( message, status ); // Calls upon this delegate.
+					} catch {
+
+					}
 				}
 			}
 
-			stream.Flush( true );
+			stream.Flush( true ); // Flushes the stream to the file.
 		}
 
-		#endregion
+#endregion
 	}
 }
