@@ -37,8 +37,8 @@ namespace Tests {
 			log.WriteVerbose( "This is a test of WritingMessage" );
 		}
 
-		private void TestWritingMessage( string message, MessageStatus status ) {
-			Debug.WriteLine( $"Got message: {message}\nIt came with status: {Enum.GetName( status.GetType(), status )}" );
+		private void TestWritingMessage( Message message, MessageStatus status ) {
+			Debug.WriteLine( $"Got message: {message.message}\nIt came with status: {Enum.GetName( status.GetType(), status )}" );
 		}
 	}
 }

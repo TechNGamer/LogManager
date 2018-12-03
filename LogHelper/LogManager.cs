@@ -10,6 +10,27 @@ using System.Threading;
 
 namespace Utilities.Log {
 	/// <summary>
+	/// Message is used to hold information regarding the message it recived.
+	/// </summary>
+	public struct Message {
+		/// <summary>
+		/// From is a string that holds which class it came from or what object with the memory location.
+		/// </summary>
+		public string from;
+
+		/// <summary>
+		/// Holds the actual message.
+		/// </summary>
+		public string message;
+
+		/// <summary>
+		/// The date and time it was pushed to the LogManager.
+		/// </summary>
+		public DateTime recieved;
+
+	}
+
+	/// <summary>
 	/// This tells the LogManager where to put the messages it recieves without having 3 seperate methods.
 	/// It also tells methods that are part of the WritingMessage delegate of what type the message is.
 	/// </summary>
@@ -33,6 +54,7 @@ namespace Utilities.Log {
 	/// Please note that this is a singleton, however the singleton is only accessable via classes in the LogHelper assembly.
 	/// </summary>
 	public class LogManager {
+
 		#region Static
 
 		// Where internal classes can get the singleton of this class from.
@@ -97,9 +119,9 @@ namespace Utilities.Log {
 								 exceptionMessageWaiting = new ManualResetEvent( false ),
 								 terminate = new ManualResetEvent( false );
 		// Queue's that will hold the messages until they are ready to be written.
-		private Queue<string> normalMessageQueue = new Queue<string>(),
-							  errorMessageQueue = new Queue<string>(),
-							  exceptionMessageQueue = new Queue<string>();
+		private Queue<Message> normalMessageQueue = new Queue<Message>(),
+							  errorMessageQueue = new Queue<Message>(),
+							  exceptionMessageQueue = new Queue<Message>();
 		// The file streams that will write to their respective files.
 		private FileStream verboseStream, errorStream, exceptionStream;
 
@@ -108,7 +130,7 @@ namespace Utilities.Log {
 		/// </summary>
 		/// <param name="message">The message that was printed out.</param>
 		/// <param name="status">THe kind of message it was.</param>
-		public delegate void WritingMessage( string message, MessageStatus status );
+		public delegate void WritingMessage( Message message, MessageStatus status );
 
 		/// <summary>
 		/// Used to signal to classes/objects that the log manager has written the message to the logs.
@@ -169,27 +191,32 @@ namespace Utilities.Log {
 		}
 
 		// Queue's up the messages for writting later by the logging thread.
-		internal void QueueMessage( string message, MessageStatus status ) {
-			message = $"{DateTime.Now.ToString( "MM/dd/yyyy HH:mm:ss" )} {message}\n"; // Rewrites the message to include the date and time.
+		internal void QueueMessage( string logClass, string message, MessageStatus status ) {
+			Message incomingMessage = new Message {
+				message = message,
+				from = logClass,
+				recieved = DateTime.Now
+			};
+
 
 			switch ( status ) {
 				case MessageStatus.Verbose:
 					lock ( normalMessageQueue ) { // Locks the queue so it can queue the message up.
-						normalMessageQueue.Enqueue( message );
+						normalMessageQueue.Enqueue( incomingMessage );
 					}
 
 					normalMessageWaiting.Set(); // Raises the flag.
 					break;
 				case MessageStatus.Error:
 					lock ( errorMessageQueue ) { // Locks the queue so it can queue the message up.
-						errorMessageQueue.Enqueue( message );
+						errorMessageQueue.Enqueue( incomingMessage );
 					}
 
 					errorMessageWaiting.Set(); // Raises the flag.
 					break;
 				case MessageStatus.Exception:
 					lock ( exceptionMessageQueue ) { // Locks the queue so it can queue the message up.
-						exceptionMessageQueue.Enqueue( message );
+						exceptionMessageQueue.Enqueue( incomingMessage );
 					}
 
 					exceptionMessageWaiting.Set(); // Raises the flag.
@@ -210,7 +237,7 @@ namespace Utilities.Log {
 			logThread.Abort(); // Aborts the thread.
 		}
 
-#region Thread Methods
+		#region Thread Methods
 
 		// This method, as the name implys, is the method that will be running on a seperate thread.
 		private void WrittingThreadMethod() {
@@ -247,10 +274,11 @@ namespace Utilities.Log {
 		}
 
 		// Used to lock the queue and write what's in the queue to the thread.
-		private void WriteToStream( FileStream stream, Queue<string> queue ) {
+		private void WriteToStream( FileStream stream, Queue<Message> queue ) {
 			string message;
 			byte[] messageBytes;
 			MessageStatus status;
+			Message queuedMessage;
 
 			lock ( queue ) { // Locks the queue so it can dequeue things off of it.
 
@@ -263,13 +291,15 @@ namespace Utilities.Log {
 				}
 
 				while ( queue.Count > 0 ) { // Loops through the queue until it's empty.
-					message = queue.Dequeue();
+					queuedMessage = queue.Dequeue();
+
+					message = $"'{queuedMessage.from}' @ {queuedMessage.recieved.ToString( "MM/dd/yyyy HH:mm:ss" )} said: {queuedMessage.message}";
 
 					messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
 					stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
 
 					try {
-						writingMessage( message, status ); // Calls upon this delegate.
+						writingMessage( queuedMessage, status ); // Calls upon this delegate.
 					} catch {
 
 					}
@@ -279,6 +309,6 @@ namespace Utilities.Log {
 			stream.Flush( true ); // Flushes the stream to the file.
 		}
 
-#endregion
+		#endregion
 	}
 }
