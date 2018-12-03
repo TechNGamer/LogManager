@@ -53,7 +53,7 @@ namespace Utilities.Log {
 	/// The LogManager handles all communication to the logs.
 	/// Please note that this is a singleton, however the singleton is only accessable via classes in the LogHelper assembly.
 	/// </summary>
-	public class LogManager {
+	public sealed class LogManager {
 
 		#region Static
 
