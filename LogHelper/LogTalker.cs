@@ -9,7 +9,7 @@ namespace Utilities.Log {
 	/// This enables the logs to help tell the person looking at it where a message came from.
 	/// All messages will be passed to the actual log manager with this format: mm/dd/yy HH:mm:ss '[Full name of class' said: [message]
 	/// </summary>
-	public class LogTalker {
+	public sealed class LogTalker {
 
 		#region Static
 
@@ -171,10 +171,9 @@ namespace Utilities.Log {
 		/// </summary>
 		/// <param name="message">The message that will be written to verbose.log.</param>
 		public void WriteVerbose( string message ) {
-			message = $"'{RepresentName}' said: {message}";
 
 			// Calls the QueueMessage method of LogManager to queue the message to the verbose log file.
-			logManager.QueueMessage( message, MessageStatus.Verbose );
+			logManager.QueueMessage( RepresentName, message, MessageStatus.Verbose );
 
 			if ( printToConsole ) {
 				Console.WriteLine( message );
@@ -186,10 +185,9 @@ namespace Utilities.Log {
 		/// </summary>
 		/// <param name="message">The message that will be written to error.log.</param>
 		public void WriteError( string message ) {
-			message = $"'{RepresentName}' said: {message}";
 
 			// Calls the QueueMessage method of LogManager to queue the message to the error log file.
-			logManager.QueueMessage( message, MessageStatus.Error );
+			logManager.QueueMessage( RepresentName, message, MessageStatus.Error );
 
 			if ( printToConsole ) {
 				Console.WriteLine( message );
@@ -203,10 +201,9 @@ namespace Utilities.Log {
 		/// <param name="message">The message the will be written to exception.log.</param>
 		/// <param name="crash">A boolean for printing the exception message to the console or not and exit the program.</param>
 		public void WriteException( string message, bool crash = true ) {
-			message = $"'{RepresentName}' said: {message}";
 
 			// Calls the QueueMessage method of LogManager to queue the message to the exception log file.
-			logManager.QueueMessage( message, MessageStatus.Exception );
+			logManager.QueueMessage( RepresentName, message, MessageStatus.Exception );
 
 			if ( crash ) { // Checks to see if the caller wants the program to crash after queueing up the message.
 				FailFast( message ); // See the method's comment for info on this.

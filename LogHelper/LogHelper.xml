@@ -4,6 +4,26 @@
         <name>LogHelper</name>
     </assembly>
     <members>
+        <member name="T:Utilities.Log.Message">
+            <summary>
+            Message is used to hold information regarding the message it recived.
+            </summary>
+        </member>
+        <member name="F:Utilities.Log.Message.from">
+            <summary>
+            From is a string that holds which class it came from or what object with the memory location.
+            </summary>
+        </member>
+        <member name="F:Utilities.Log.Message.message">
+            <summary>
+            Holds the actual message.
+            </summary>
+        </member>
+        <member name="F:Utilities.Log.Message.recieved">
+            <summary>
+            The date and time it was pushed to the LogManager.
+            </summary>
+        </member>
         <member name="T:Utilities.Log.MessageStatus">
             <summary>
             This tells the LogManager where to put the messages it recieves without having 3 seperate methods.
