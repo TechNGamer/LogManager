@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Utilities.Log {
+namespace Logging {
 
 	/// <summary>
 	/// This class acts as a middle man to the log files.

@@ -7,7 +7,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 
-namespace Utilities.Log {
+namespace Logging {
 	// This tells the LogManager where to put the messages it recieves without having 3 seperate methods.
 	internal enum MessageStatus {
 		Verbose = 0,

@@ -4,56 +4,56 @@
         <name>LogHelper</name>
     </assembly>
     <members>
-        <member name="T:Utilities.Log.LogTalker">
+        <member name="T:Logging.LogTalker">
             <summary>
             This class acts as a middle man to the log files.
             This enables the logs to help tell the person looking at it where a message came from.
             All messages will be passed to the actual log manager with this format: mm/dd/yy HH:mm:ss '[Full name of class' said: [message]
             </summary>
         </member>
-        <member name="P:Utilities.Log.LogTalker.LogFolder">
+        <member name="P:Logging.LogTalker.LogFolder">
             <summary>
             Exposes the log folder location.
             </summary>
         </member>
-        <member name="P:Utilities.Log.LogTalker.VerboseLog">
+        <member name="P:Logging.LogTalker.VerboseLog">
             <summary>
             Exposes the verbose.log file location.
             </summary>
         </member>
-        <member name="P:Utilities.Log.LogTalker.ErrorLog">
+        <member name="P:Logging.LogTalker.ErrorLog">
             <summary>
             Exposes the verbose.log file location.
             </summary>
         </member>
-        <member name="P:Utilities.Log.LogTalker.ExceptionLog">
+        <member name="P:Logging.LogTalker.ExceptionLog">
             <summary>
             Exposes the error.log file location.
             </summary>
         </member>
-        <member name="P:Utilities.Log.LogTalker.LogEncoding">
+        <member name="P:Logging.LogTalker.LogEncoding">
             <summary>
             Exposes the exception.log file location.
             </summary>
         </member>
-        <member name="M:Utilities.Log.LogTalker.FinishWriting">
+        <member name="M:Logging.LogTalker.FinishWriting">
             <summary>
             Tells LogManager to signal to the logging thread to finish writing and terminate.
             </summary>
         </member>
-        <member name="P:Utilities.Log.LogTalker.RepresentName">
+        <member name="P:Logging.LogTalker.RepresentName">
             <summary>
             The name of the object that this object will be representing in the logs.
             </summary>
         </member>
-        <member name="M:Utilities.Log.LogTalker.#ctor(System.Type,System.Boolean)">
+        <member name="M:Logging.LogTalker.#ctor(System.Type,System.Boolean)">
             <summary>
             Creates a new LogTalker for the Type passed to it.
             </summary>
             <param name="t">The type of the object.</param>
             <param name="printToConsole">A boolean for rather every call will print to the console.</param>
         </member>
-        <member name="M:Utilities.Log.LogTalker.#ctor(System.Object@,System.Boolean)">
+        <member name="M:Logging.LogTalker.#ctor(System.Object@,System.Boolean)">
             <summary>
             Creates a new LogTalker for the object passed to it.
             This constructor makes it more specific to which object by also including the objects hash code.
@@ -61,19 +61,19 @@
             <param name="o">The object you wish to be represented.</param>
             <param name="printToConsole">A boolean for rather every call will print to the console.</param>
         </member>
-        <member name="M:Utilities.Log.LogTalker.WriteVerbose(System.String)">
+        <member name="M:Logging.LogTalker.WriteVerbose(System.String)">
             <summary>
             Writes any messages passed to it to the verbose log.
             </summary>
             <param name="message">The message that will be written to verbose.log.</param>
         </member>
-        <member name="M:Utilities.Log.LogTalker.WriteError(System.String)">
+        <member name="M:Logging.LogTalker.WriteError(System.String)">
             <summary>
             Writes any messages passed to it to the error log.
             </summary>
             <param name="message">The message that will be written to error.log.</param>
         </member>
-        <member name="M:Utilities.Log.LogTalker.WriteException(System.String,System.Boolean)">
+        <member name="M:Logging.LogTalker.WriteException(System.String,System.Boolean)">
             <summary>
             Writes any messages passed to it to the exception log.
             By default, <paramref name="crash"/> is default true, meaning that it will print the message to the console if present.
@@ -81,18 +81,18 @@
             <param name="message">The message the will be written to exception.log.</param>
             <param name="crash">A boolean for printing the exception message to the console or not and exit the program.</param>
         </member>
-        <member name="M:Utilities.Log.LogTalker.WriteException(System.String,System.Exception,System.Boolean)">
+        <member name="M:Logging.LogTalker.WriteException(System.String,System.Exception,System.Boolean)">
             <summary>
             Writes any messages passed to it to the exception log.
             By default, <paramref name="crash"/> is default true, meaning that it will print the message to the console if present.
             <paramref name="e"/> will be incorperated into the message before being written to the log file.
-            See also: <seealso cref="M:Utilities.Log.LogTalker.WriteException(System.String,System.Boolean)"/>
+            See also: <seealso cref="M:Logging.LogTalker.WriteException(System.String,System.Boolean)"/>
             </summary>
             <param name="message">The message the will be written to exception.log.</param>
             <param name="e">The exception that will be incorperated into the message.</param>
             <param name="crash">A boolean for printing the exception message to the console or not.</param>
         </member>
-        <member name="M:Utilities.Log.LogTalker.Close">
+        <member name="M:Logging.LogTalker.Close">
             <summary>
             Tells the LogManager to signal to the logging thread to write everything and terminate.
             </summary>
