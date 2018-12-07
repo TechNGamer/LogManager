@@ -144,7 +144,7 @@ namespace Logging {
 
 #if !DEBUG
 			if ( Environment.OSVersion.Platform == PlatformID.Unix ) { // Checks to see if the platform is Unix/Unix-like.
-				LogFolder = Path.Combine( "/var/log", programName ); // Creates the log folder at /var/log/[program name].
+				LogFolder = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData ), $".{programName}", "logs" );
 			} else if ( Environment.OSVersion.Platform == PlatformID.Win32NT ) { // Checks to see if the platform is Windows.
 				LogFolder = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData ), programName, "logs" );
 			} else { // Otherwise, if it is an unkown platform, create the log folder at the executable location.
