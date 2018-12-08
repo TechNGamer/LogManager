@@ -12,22 +12,112 @@ namespace Logging {
 	/// <summary>
 	/// Message is used to hold information regarding the message it recived.
 	/// </summary>
-	public struct Message {
+	public struct MessageContainer : IEquatable<MessageContainer> {
 		/// <summary>
 		/// From is a string that holds which class it came from or what object with the memory location.
 		/// </summary>
-		public string from;
+		public string From {
+			get;
+		}
 
 		/// <summary>
 		/// Holds the actual message.
 		/// </summary>
-		public string message;
+		public string Message {
+			get;
+		}
 
 		/// <summary>
 		/// The date and time it was pushed to the LogManager.
 		/// </summary>
-		public DateTime recieved;
+		public DateTime Recieved {
+			get;
+		}
 
+		/// <summary>
+		/// Constructor to build this immutable struct.
+		/// </summary>
+		/// <param name="from">What class/object is it from.</param>
+		/// <param name="message">The message produced by the object/class.</param>
+		/// <param name="recieved">The date and time the message was recived.</param>
+		public MessageContainer( string from, string message, DateTime recieved ) {
+			From = from;
+			Message = message;
+			Recieved = recieved;
+		}
+
+		/// <summary>
+		/// Compares to see if an object is the same as this object.
+		/// </summary>
+		/// <param name="obj">The object to check.</param>
+		/// <returns>True if the objects are the same, otherwise false.</returns>
+		public override bool Equals( object obj ) {
+			return obj is MessageContainer && Equals( ( MessageContainer )obj );
+		}
+
+		/// <summary>
+		/// Checks to see if another MessageContainer is the same as this one.
+		/// </summary>
+		/// <param name="other">Another MessageContainer.</param>
+		/// <returns>True if they have the same contents.</returns>
+		public bool Equals( MessageContainer other ) {
+			return From == other.From && Message == other.Message && Recieved == other.Recieved;
+		}
+
+		/// <summary>
+		/// Generates a hash code for this struct.
+		/// </summary>
+		/// <returns>A hash code.</returns>
+		public override int GetHashCode() {
+			int hashCode = 1733014643;
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode( From );
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode( Message );
+			hashCode = hashCode * -1521134295 + Recieved.GetHashCode();
+			return hashCode;
+		}
+
+		/// <summary>
+		/// Compares to see if an object is the same as a MessageContainer.
+		/// See also: <seealso cref="Equals(object)"/>.
+		/// </summary>
+		/// <param name="left">The MessageContainer.</param>
+		/// <param name="right">The object to check.</param>
+		/// <returns>True if they are the same.</returns>
+		public static bool operator ==( MessageContainer left, object right ) {
+			return left.Equals( right );
+		}
+
+		/// <summary>
+		/// Compares to see if they are the same.
+		/// See also: <seealso cref="Equals(MessageContainer)"/>.
+		/// </summary>
+		/// <param name="left">The left hand side MessageContainer.</param>
+		/// <param name="right">The right hand side MessageContainer.</param>
+		/// <returns>True if they are the same.</returns>
+		public static bool operator ==( MessageContainer left, MessageContainer right ) {
+			return left.Equals( right );
+		}
+
+		/// <summary>
+		/// Compares to see if an object is not the same as a MessageContainer.
+		/// </summary>
+		/// <param name="left">The MessageContainer.</param>
+		/// <param name="right">The object to check.</param>
+		/// <returns>True if they are not the same.</returns>
+		public static bool operator !=( MessageContainer left, object right ) {
+			return !left.Equals( right );
+		}
+
+		/// <summary>
+		/// Compares to see if they are not the same.
+		/// See also: <seealso cref="Equals(object)"/>.
+		/// </summary>
+		/// <param name="left">The left hand side MessageContainer.</param>
+		/// <param name="right">The right hand side MessageContainer.</param>
+		/// <returns>True if they are not the same.</returns>
+		public static bool operator !=( MessageContainer left, MessageContainer right ) {
+			return !left.Equals( right );
+		}
 	}
 
 	/// <summary>
@@ -118,9 +208,9 @@ namespace Logging {
 								 exceptionMessageWaiting = new ManualResetEvent( false ),
 								 terminate = new ManualResetEvent( false );
 		// Queue's that will hold the messages until they are ready to be written.
-		private Queue<Message> normalMessageQueue = new Queue<Message>(),
-							  errorMessageQueue = new Queue<Message>(),
-							  exceptionMessageQueue = new Queue<Message>();
+		private Queue<MessageContainer> normalMessageQueue = new Queue<MessageContainer>(),
+							  errorMessageQueue = new Queue<MessageContainer>(),
+							  exceptionMessageQueue = new Queue<MessageContainer>();
 		// The file streams that will write to their respective files.
 		private FileStream verboseStream, errorStream, exceptionStream;
 
@@ -129,7 +219,7 @@ namespace Logging {
 		/// </summary>
 		/// <param name="message">The message that was printed out.</param>
 		/// <param name="status">THe kind of message it was.</param>
-		public delegate void WritingMessage( Message message, MessageStatus status );
+		public delegate void WritingMessage( MessageContainer message, MessageStatus status );
 
 		/// <summary>
 		/// Used to signal to classes/objects that the log manager has written the message to the logs.
@@ -191,12 +281,7 @@ namespace Logging {
 
 		// Queue's up the messages for writting later by the logging thread.
 		internal void QueueMessage( string logClass, string message, MessageStatus status ) {
-			Message incomingMessage = new Message {
-				message = message,
-				from = logClass,
-				recieved = DateTime.Now
-			};
-
+			MessageContainer incomingMessage = new MessageContainer( logClass, message, DateTime.UtcNow ); // Creates the immutable struct.
 
 			switch ( status ) {
 				case MessageStatus.Verbose:
@@ -273,11 +358,11 @@ namespace Logging {
 		}
 
 		// Used to lock the queue and write what's in the queue to the thread.
-		private void WriteToStream( FileStream stream, Queue<Message> queue ) {
+		private void WriteToStream( FileStream stream, Queue<MessageContainer> queue ) {
 			string message;
 			byte[] messageBytes;
 			MessageStatus status;
-			Message queuedMessage;
+			MessageContainer queuedMessage;
 
 			lock ( queue ) { // Locks the queue so it can dequeue things off of it.
 
@@ -292,7 +377,7 @@ namespace Logging {
 				while ( queue.Count > 0 ) { // Loops through the queue until it's empty.
 					queuedMessage = queue.Dequeue();
 
-					message = $"'{queuedMessage.from}' @ {queuedMessage.recieved.ToString( "MM/dd/yyyy HH:mm:ss" )} said: {queuedMessage.message}";
+					message = $"'{queuedMessage.From}' @ {queuedMessage.Recieved.ToString( "MM/dd/yyyy HH:mm:ss" )} said: {queuedMessage.Message}";
 
 					messageBytes = LogEncoding.GetBytes( message ); // Get's the byte[] that the message will be.
 					stream.Write( messageBytes, 0, messageBytes.Length ); // Has the stream write the message to the queue.
