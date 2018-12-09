@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Utilities.Log</RootNamespace>
+    <RootNamespace>Logging</RootNamespace>
     <PackageId>Logging Helper</PackageId>
     <Authors>KuroNeko (Tech N Gamer)</Authors>
     <Company />
@@ -24,5 +24,11 @@
     <DocumentationFile>LogHelper.xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="MessageContainer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
 
 </Project>
