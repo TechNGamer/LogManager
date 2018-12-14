@@ -170,7 +170,7 @@ namespace Logging {
 
 		// Queue's up the messages for writting later by the logging thread.
 		internal void QueueMessage( string logClass, string message, MessageStatus status ) {
-			MessageContainer incomingMessage = new MessageContainer( logClass, message, DateTime.UtcNow ); // Creates the immutable struct.
+			MessageContainer incomingMessage = new MessageContainer( logClass, message, DateTime.Now ); // Creates the immutable struct.
 
 			switch ( status ) {
 				case MessageStatus.Verbose:
