@@ -123,14 +123,14 @@ namespace Logging {
 
 #if !DEBUG
 			if ( Environment.OSVersion.Platform == PlatformID.Unix ) { // Checks to see if the platform is Unix/Unix-like.
-				LogFolder = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), $".{programName.ToLower()}", "logs" );
+				LogFolder = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData ), $"{programName}", "logs" );
 			} else if ( Environment.OSVersion.Platform == PlatformID.Win32NT ) { // Checks to see if the platform is Windows.
 				LogFolder = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData ), programName, "logs" );
 			} else { // Otherwise, if it is an unkown platform, create the log folder at the executable location.
 				LogFolder = Path.Combine( Assembly.GetEntryAssembly().Location, "logs" );
 			}
 #else
-			LogFolder = Path.Combine( Path.GetDirectoryName( Assembly.GetEntryAssembly().FullName ), "Logs" );
+			LogFolder = "Logs";
 #endif
 
 
@@ -148,8 +148,6 @@ namespace Logging {
 			logThread = new Thread( () => WrittingThreadMethod() ) { // Creates a new Thread that calls WrittingThreadMethod().
 				Priority = ThreadPriority.Lowest // Set's the thread to lowest priority to prevent blocking.
 			};
-
-			//SetUpLogs( programName ); // See method's doc comment.
 
 			// Opens the verbose file for writing and allows other programs to read the file while the program is able to write to it.
 			verboseStream = new FileStream( VerboseLog, FileMode.Create, FileAccess.Write, FileShare.Read );
